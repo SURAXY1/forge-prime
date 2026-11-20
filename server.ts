@@ -75,8 +75,9 @@ function segmentsOf(path) {
 function tryGitRoute(req, path, queryText, body) {
   // shape: /{owner}/{repo}[.git]/{info/refs|git-upload-pack|git-receive-pack}
   const parts = path.split('/');
-  if (parts.length !== 4 || parts[0] !== '') return null;
-  const tail = parts[3];
+  if (parts[0] !== '') return null;
+  const tail = parts.length === 5 && parts[3] === 'info' && parts[4] === 'refs' ? 'info/refs' : parts.length === 4 ? parts[3] : null;
+  if (tail === null) return null;
   if (tail !== 'info/refs' && tail !== 'git-upload-pack' && tail !== 'git-receive-pack') return null;
   if (!isAuthed(req.headers.authorization)) return frame(401, 'text/plain', 'Authentication required\n', ['WWW-Authenticate', 'Basic realm="forge-prime"']);
   let owner = parts[1], name = parts[2];
